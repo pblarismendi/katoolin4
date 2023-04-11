@@ -1,5 +1,5 @@
 #!/bin/bash
-# Update katoolin3 by running this script
+# Update katoolin4 by running this script
 
 git pull && ./install.sh;
 exit 0;

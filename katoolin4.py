@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# katoolin3 - Install Kali packages on your Debian/Ubuntu machine
+# katoolin4 - Install Kali packages on your Debian/Ubuntu machine
 # Copyright (C) 2019 s-h-3-l-l
 #
 # This program is free software; you can redistribute it and/or modify
@@ -19,11 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 """
-katoolin3 is a port of katoolin for python3.
+katoolin4 is a port of katoolin for python3.
 """
 
-__author__ = "s-h-3-l-l"
-__credits__ = ["LionSec"]
+__author__ = "parismendi"
+__credits__ = ["LionSec", "s-h-3-l-l"]
 __license__ = "GPL"
 
 import os
@@ -34,9 +34,9 @@ import shlex
 import textwrap
 
 try:
-    import apt
+    import pacman
 except ImportError:
-    print("Please install the 'python3-apt' package")
+    print("Please install the 'python-pacman' package")
     exit(1)
 
 # The list of kali programs available in the repo with the format:
@@ -627,16 +627,16 @@ class VisibleError(Exception):
     def __str__(self):
         return Terminal.red + str(self.__cause__) + Terminal.reset
 
-class APTException(Exception):
+class PacmanException(Exception):
     """
-    An exception that indicates an error with APTManager.
+    An exception that indicates an error with Pacman Manager.
     """
 
-class APTManager:
+class PacmanManager:
     """
-    A wrapper class for operations with aptitude
+    A wrapper class for operations with pacman
     """
-    sources_file = "/etc/apt/sources.list.d/katoolin3.list"
+    sources_file = "/etc/pacman.d/katoolin4"
 
     def __init__(self, silent=False):
         self._cache = None
@@ -645,7 +645,7 @@ class APTManager:
 
     def __enter__(self):
         """
-        Installs the sources file and updates the APT cache.
+        Installs the sources file and updates the Pacman cache.
         """
         arch = detect_arch()
         
@@ -654,8 +654,8 @@ class APTManager:
             
         try:
             with open(self.sources_file, "w") as file:
-                file.write("# This file was automatically created by katoolin3. DO NOT MODIFY\n")
-                file.write("deb {} http://http.kali.org/kali kali-rolling main contrib non-free\n".format(arch))
+                file.write("# This file was automatically created by katoolin4. DO NOT MODIFY\n")
+                file.write("Server = https://ftp.halifax.rwth-aachen.de/blackarch/$repo/os/$arch\n".format(arch))
         except OSError as e:
             raise VisibleError() from e
 
@@ -670,7 +670,7 @@ class APTManager:
         finally:
             self._cache.close()
             # Launch update in background
-            os.system("apt-get -m -y -qq update &")
+            os.system("pacman -Syu")
 
     def __getitem__(self, item):
         """
@@ -683,18 +683,18 @@ class APTManager:
         Reload new package information into the cache.
 
         Unfortunately I couldnt find a better way to
-        do this. The python3-apt-API seems uncomplete
+        do this. The python-pacman seems uncomplete
         on this matter.
         """
         if self._cache is not None:
             self._cache.close()
-        self._cache = apt.Cache()
+        self._cache = pacman.get_installed()
 
     def update(self):
         if os.system(
-                "apt-get -m -y {} update".format("-qq" if self._silent else "-q")
+                "pacman -Syu"
         ) != self._success_code:
-            raise VisibleError() from APTException("Apt update failed")
+            raise VisibleError() from PacmanException("Pacman update failed")
 
         self.flush()
 
@@ -703,7 +703,7 @@ class APTManager:
         Install packages from iterator 'pkgs'
         """
         if self._cache.dpkg_journal_dirty:
-            raise VisibleError() from Exception("Your dpkg is in an unsafe state. Run 'sudo dpkg --configure -a' to fix this.")
+            raise VisibleError() from Exception("Your pacman is in an unsafe state. Run 'sudo pacman --configure -a' to fix this.")
         
         print("Reading package lists...")
         num = 0
@@ -730,7 +730,7 @@ class APTManager:
         try:
             self._cache.commit(fetch_progress=apt.progress.text.AcquireProgress())
         except SystemError as s:
-            raise VisibleError() from APTException("Installation of some packages failed ({})".format(s))
+            raise VisibleError() from PacmanException("Installation of some packages failed ({})".format(s))
 
         self.flush()
 
@@ -762,7 +762,7 @@ class APTManager:
         try:
             self._cache.commit()
         except SystemError as s:
-            raise VisibleError() from APTException("Removal failed: " + str(s))
+            raise VisibleError() from PacmanException("Removal failed: " + str(s))
 
         self.flush()
 
@@ -842,14 +842,14 @@ class APTManager:
 
     def search(self, key):
         """
-        Search for keywords in the apt cache.
+        Search for keywords in the pacman cache.
 
-        I haven't found a solution with the APT-API.
+        I haven't found a solution with the Pacman.
         """
         key = shlex.quote(key)
 
         if key:
-            os.system("apt search -qq {};".format(key))
+            os.system("pacman -Qi {};".format(key))
 
 def detect_arch(default=""):
     """
@@ -872,14 +872,14 @@ def print_logo():
     The obligatory ascii art
     """
     print("""
- {f}██{b}╗  {f}██{b}╗ {f}█████{b}╗ {f}████████{b}╗ {f}██████{b}╗  {f}██████{b}╗ {f}██{b}╗     {f}██{b}╗{f}███{b}╗   {f}██{b}╗{s}██████{b}╗
- {f}██{b}║ {f}██{b}╔╝{f}██{b}╔══{f}██{b}╗╚══{f}██{b}╔══╝{f}██{b}╔═══{f}██{b}╗{f}██{b}╔═══{f}██{b}╗{f}██{b}║     {f}██{b}║{f}████{b}╗  {f}██{b}║╚════{s}██{b}╗
- {f}█████{b}╔╝ {f}███████{b}║   {f}██{b}║   {f}██{b}║   {f}██{b}║{f}██{b}║   {f}██{b}║{f}██{b}║     {f}██{b}║{f}██{b}╔{f}██{b}╗ {f}██{b}║ {s}█████{b}╔╝
- {f}██{b}╔═{f}██{b}╗ {f}██{b}╔══{f}██{b}║   {f}██{b}║   {f}██{b}║   {f}██{b}║{f}██{b}║   {f}██{b}║{f}██{b}║     {f}██{b}║{f}██{b}║╚{f}██{b}╗{f}██{b}║ ╚═══{s}██{b}╗
- {f}██{b}║  {f}██{b}╗{f}██{b}║  {f}██{b}║   {f}██{b}║   ╚{f}██████{b}╔╝╚{f}██████{b}╔╝{f}███████{b}╗{f}██{b}║{f}██{b}║ ╚{f}████{b}║{s}██████{b}╔╝
- {b}╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚═╝╚═╝  ╚═══╝╚═════╝
+ {f}██{b}╗  {f}██{b}╗ {f}█████{b}╗ {f}████████{b}╗ {f}██████{b}╗  {f}██████{b}╗ {f}██{b}╗     {f}██{b}╗{f}███{b}╗   {f}██{b}╗{s}
+ {f}██{b}║ {f}██{b}╔╝{f}██{b}╔══{f}██{b}╗╚══{f}██{b}╔══╝{f}██{b}╔═══{f}██{b}╗{f}██{b}╔═══{f}██{b}╗{f}██{b}║     {f}██{b}║{f}████{b}╗  {f}██{b}║
+ {f}█████{b}╔╝ {f}███████{b}║   {f}██{b}║   {f}██{b}║   {f}██{b}║{f}██{b}║   {f}██{b}║{f}██{b}║     {f}██{b}║{f}██{b}╔{f}██{b}╗ {f}██{b}║
+ {f}██{b}╔═{f}██{b}╗ {f}██{b}╔══{f}██{b}║   {f}██{b}║   {f}██{b}║   {f}██{b}║{f}██{b}║   {f}██{b}║{f}██{b}║     {f}██{b}║{f}██{b}║╚{f}██{b}╗{f}██{b}║
+ {f}██{b}║  {f}██{b}╗{f}██{b}║  {f}██{b}║   {f}██{b}║   ╚{f}██████{b}╔╝╚{f}██████{b}╔╝{f}███████{b}╗{f}██{b}║{f}██{b}║ ╚{f}████{b}║
+ {b}╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚═╝╚═╝  ╚═══╝
 """.format(f=Terminal.red, b=Terminal.black, s=Terminal.red), end=Terminal.reset)
-    print("""{} ~~~~~{{ Author: s-h-3-l-l | Homepage: https://github.com/s-h-3-l-l }}~~~~~
+    print("""{} {{ Author: parismendi | Homepage: https://github.com/s-h-3-l-l }}
 {}""".format(Terminal.white, Terminal.reset))
     print()
 
@@ -1060,10 +1060,10 @@ def list_not_installed_packages():
 
 def search():
     """
-    Searches the APT cache. If the search string is
+    Searches the Pacman cache. If the search string is
     a package name display information about the package
-    like 'apt show' otherwise treat it like a keyword for
-    'apt search'.
+    like 'pacman show' otherwise treat it like a keyword for
+    'pacman search'.
     """
     print()
     print("Enter a package name to get information about a package")
@@ -1109,7 +1109,7 @@ def handle_old_katoolin(force=False):
     to delete it or force the uninstallation.
     """
     try:
-        with open("/etc/apt/sources.list", "r+") as file:
+        with open("/etc/pacman.d/katoolin4", "a+") as file:
             file.seek(0)
             lines = []
             seen = False
@@ -1153,14 +1153,14 @@ def print_disclaimer():
 {}DISCLAIMER:
 Don't update your packages, upgrade your system or
 modify your package cache in any other way while 
-katoolin3 is still running!
+katoolin4 is still running!
 {}""".format(Terminal.red, Terminal.reset))
 
 if __name__ == "__main__":
     try:
         print_logo()
         handle_old_katoolin()
-        with APTManager() as APT: # this will be used globally
+        with PacmanManager() as APT: # this will be used globally
             print()
             print_disclaimer()
             main()

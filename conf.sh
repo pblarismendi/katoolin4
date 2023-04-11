@@ -5,7 +5,7 @@
 DIR="/usr/local/bin";
 
 # The name of the program after installation:
-PROGRAM="katoolin3";
+PROGRAM="katoolin4";
 
 # Show error message and quit:
 die(){

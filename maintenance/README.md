@@ -13,15 +13,15 @@ __But:__ Since not all tools on the website are available in the repositories an
 ### Checking available packages
 [search.py](search.py) provides a CLI for searching the kali repository.  
 
-[missing.py](missing.py) analyzes katoolin3's package list and checks that all packages from its list are available in the repositories.
+[missing.py](missing.py) analyzes katoolin4's package list and checks that all packages from its list are available in the repositories.
 
 ### Cleaning up the output
-[sort.py](sort.py) takes the package list from katoolin3 and outputs it in a lexicographically sorted manner.
-The package list in [katoolin3.py](../katoolin3.py) shall always be sorted.
+[sort.py](sort.py) takes the package list from katoolin4 and outputs it in a lexicographically sorted manner.
+The package list in [katoolin4.py](../katoolin4.py) shall always be sorted.
 
 ### A standard workflow:
 - Start [toollist.py](toollist.py) to see what packages have to be removed or added. 
-- Edit the package list in katoolin3
+- Edit the package list in katoolin4
 - Start [missing.py](missing.py) to check if all packages exist in the repository
 - Execute [sort.py](sort.py) and copy the result into the file
 - Drink a coffee.

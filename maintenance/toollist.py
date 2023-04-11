@@ -4,7 +4,7 @@
 """
 toollist.py: Download the list of tools which are currently
              available in Kali Linux and compare them to
-             the package list of katoolin3.
+             the package list of katoolin4.
 
 Invoke with: PYTHONPATH=.. ./toollist.py
 """
@@ -13,7 +13,7 @@ from html.parser import HTMLParser
 import subprocess
 import requests
 
-import katoolin3
+import katoolin4
 
 file = "tools.lst"
 
@@ -186,5 +186,5 @@ if __name__ == "__main__":
         "User-Agent": "Luffa-plex Dill Pickle-inator"
     })
     r.raise_for_status()
-    with katoolin3.APTManager(silent=True) as apt_mgr, open(file, "w") as lst:
-        DictDiff(katoolin3.PACKAGES, Parser().feed(r.text)).diff()
+    with katoolin4.APTManager(silent=True) as apt_mgr, open(file, "w") as lst:
+        DictDiff(katoolin4.PACKAGES, Parser().feed(r.text)).diff()

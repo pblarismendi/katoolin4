@@ -9,10 +9,10 @@ Invoke with: sudo PYTHONPATH=.. ./search.py
 
 import os
 import shlex
-import katoolin3
+import katoolin4
 
 if __name__ == "__main__":
-    with katoolin3.APTManager(silent=True) as apt_mgr:
+    with katoolin4.APTManager(silent=True) as apt_mgr:
         while True:
             search = shlex.quote(input("Search: "))
 

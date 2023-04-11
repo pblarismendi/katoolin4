@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
 """
-sort.py: Takes katoolin3s package list, sorts it and outputs
+sort.py: Takes katoolin4s package list, sorts it and outputs
          it so that it can be directly copy-and-pasted into
          the source file.
 
 Invoke with: PYTHONPATH=.. ./sort.py
 """
 
-from katoolin3 import PACKAGES
+from katoolin4 import PACKAGES
 
 outfile = "sorted.lst"
 
