@@ -2,7 +2,7 @@
 Katoolin4 brings all programs available in Kali Linux to Arch-based distributions.
 
 ### Description
-This program is a port of [katoolin](https://github.com/LionSec/katoolin) from [LionSec](https://github.com/LionSec) and [katoolin4] from [s-h-3-l-l](https://github.com/s-h-3-l-l) to python3. Katoolin4 offers several improvements over katoolin:
+This program is a port of [katoolin](https://github.com/LionSec/katoolin) from [LionSec](https://github.com/LionSec) and [katoolin3](https://github.com/s-h-3-l-l/katoolin3) from [s-h-3-l-l](https://github.com/s-h-3-l-l) to python3. Katoolin4 offers several improvements over katoolin:
 - __Up to date packages__    
 The old katoolin uses an outdated package list. Katoolin4 always keeps its package list up to date.  
 _(Last updated: 11 Apr 2023)_
@@ -36,7 +36,7 @@ It is not recommended to install all tools.
 
 ### Installation
 ```bash
-git clone https://github.com/s-h-3-l-l/katoolin4;
+git clone https://github.com/pblarismendi/katoolin4;
 cd katoolin4;
 chmod +x ./install.sh;
 sudo ./install.sh;
@@ -82,7 +82,7 @@ sudo ./update.sh;
 ```  
 
 ### Something doesn't work?
-Hit me up on [Github](https://github.com/s-h-3-l-l/katoolin4/issues/new/choose).
+Hit me up on [Github](https://github.com/pblarismendi/katoolin4/issues/new/choose).
 
 ### Uninstalling
 To uninstall katoolin4 execute
